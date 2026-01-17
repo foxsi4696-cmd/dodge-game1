@@ -142,3 +142,25 @@ blocksInterval = setInterval(createBlock, spawnRate);
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
 }
+let type = "red";
+if(level >= 3){
+    const types = ["red","blue","yellow"];
+    type = types[Math.floor(Math.random()*types.length)];
+}
+block.className = "block " + type;
+block.style.background = "url('asteroid_"+type+".png') no-repeat center / contain";
+
+let zigzag = 0;
+if(type==="blue"){
+    zigzag = Math.random()<0.5 ? 1 : -1; // направление зигзага
+}
+
+const fall = setInterval(()=>{
+    y += speed;
+    block.style.top = y + "px";
+
+    if(type==="blue") block.style.left = parseInt(block.style.left)+zigzag+"px";
+
+    if(y>340 && Math.abs(parseInt(block.style.left)-playerX)<35) endGame();
+    if(y>420){ clearInterval(fall); block.remove(); score++; scoreEl.textContent = score; updateLevel(); }
+},20);
