@@ -170,3 +170,11 @@ function restartGame() {
 
 // ===== Старт игры =====
 blocksInterval = setInterval(createBlock, spawnRate);
+let blocksInterval;
+
+// === Функция старта игры ===
+const startBtn = document.getElementById("startBtn");
+startBtn.addEventListener("click", () => {
+    startBtn.style.display = "none"; // скрываем кнопку
+    blocksInterval = setInterval(createBlock, spawnRate); // стартуем игру
+});
