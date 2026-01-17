@@ -1,49 +1,49 @@
 body {
-background: #111;
-color: white;
-text-align: center;
-font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
 }
 
 #game {
-width: 300px;
-height: 400px;
-background: black;
-margin: 20px auto;
-position: relative;
-overflow: hidden;
-border: 2px solid #00ff00;
+    width: 300px;
+    height: 400px;
+    background: url("space.jpg") center / cover;
+    margin: 20px auto;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid #00ff00;
 }
 
 #player {
-width: 40px;
-height: 40px;
-background: green;
-position: absolute;
-bottom: 10px;
-left: 130px;
+    width: 40px;
+    height: 40px;
+    background: url("rocket.png") no-repeat center / contain;
+    position: absolute;
+    bottom: 10px;
+    left: 130px;
 }
 
 .block {
-width: 40px;
-height: 40px;
-background: red;
-position: absolute;
-top: 0;
+    width: 40px;
+    height: 40px;
+    background: url("asteroid.png") no-repeat center / contain;
+    position: absolute;
+    top: 0;
 }
 
 #controls button {
-font-size: 24px;
-padding: 10px 20px;
-margin: 5px;
+    font-size: 24px;
+    padding: 10px 20px;
+    margin: 5px;
 }
 
 #restartBtn {
-display: none;
-margin-top: 15px;
-padding: 12px 25px;
-font-size: 18px;
-border-radius: 10px;
-border: none;
-background: orange;
+    display: none;
+    margin-top: 15px;
+    padding: 12px 25px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: orange;
 }
