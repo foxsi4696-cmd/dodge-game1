@@ -1,7 +1,4 @@
 let playerX = 130;        // текущая позиция ракеты
-let targetX = playerX;     // куда движется ракета
-let speedMove = 8;         // скорость скольжения ракеты
-
 let score = 0;
 let level = 1;
 let speed = 4;
@@ -20,65 +17,45 @@ const restartBtn = document.getElementById("restartBtn");
 highscoreEl.textContent = highScore;
 levelEl.textContent = level;
 
-// Плавное движение ракеты
-function animatePlayer() {
-    if (Math.abs(playerX - targetX) < 1) {
-        playerX = targetX;
-    } else if (playerX < targetX) {
-        playerX += speedMove;
-    } else if (playerX > targetX) {
-        playerX -= speedMove;
-    }
-    player.style.left = playerX + "px";
-    requestAnimationFrame(animatePlayer);
-}
-animatePlayer();
-
-// Кнопки управления
+// ===== Кнопки управления =====
 function moveLeft() {
-    if (!gameOver) targetX = Math.max(0, targetX - 40);
+    if (!gameOver) playerX = Math.max(0, playerX - 40);
+    player.style.left = playerX + "px";
 }
+
 function moveRight() {
-    if (!gameOver) targetX = Math.min(260, targetX + 40);
+    if (!gameOver) playerX = Math.min(260, playerX + 40);
+    player.style.left = playerX + "px";
 }
 
-// Свайп для телефонов
-const gameDiv = document.getElementById("game");
-
-gameDiv.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-});
-
-gameDiv.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    let touchX = e.touches[0].clientX;
-
-    const rect = gameDiv.getBoundingClientRect();
-    let relativeX = touchX - rect.left;
-
-    targetX = Math.min(260, Math.max(0, relativeX - 20)); // центр ракеты на пальце
-});
-
-gameDiv.addEventListener("touchend", (e) => {
-    playerX = targetX;
-});
-
-// Создание астероидов
+// ===== Создание астероидов =====
 function createBlock() {
     if (gameOver) return;
 
     const lanes = [20, 130, 240];
-    const lane = lanes[Math.floor(Math.random() * lanes.length)];
-    const count = Math.random() < 0.4 ? 2 : 1;
+    let selectedLanes = [];
 
-    for (let i = 0; i < count; i++) {
+    if (level < 3) {
+        // Уровень 1 и 2: по 1 астероиду
+        selectedLanes.push(lanes[Math.floor(Math.random() * lanes.length)]);
+    } else {
+        // Уровень 3 и выше: по 2 астероида
+        let firstLane = lanes[Math.floor(Math.random() * lanes.length)];
+        let secondLane;
+        do {
+            secondLane = lanes[Math.floor(Math.random() * lanes.length)];
+        } while (secondLane === firstLane);
+        selectedLanes = [firstLane, secondLane];
+    }
+
+    for (let lane of selectedLanes) {
         const block = document.createElement("div");
         block.className = "block";
         block.style.left = lane + "px";
-        block.style.top = (-i * 60) + "px";
-        gameDiv.appendChild(block);
+        block.style.top = "-60px";
+        document.getElementById("game").appendChild(block);
 
-        let y = -i * 60;
+        let y = -60;
 
         const fall = setInterval(() => {
             if (gameOver) {
@@ -90,10 +67,12 @@ function createBlock() {
             y += speed;
             block.style.top = y + "px";
 
+            // Столкновение с ракетой
             if (y > 340 && Math.abs(block.offsetLeft - playerX) < 35) {
                 endGame();
             }
 
+            // Ушел за экран
             if (y > 420) {
                 clearInterval(fall);
                 block.remove();
@@ -105,14 +84,18 @@ function createBlock() {
     }
 }
 
-// Обновление уровня
+// ===== Обновление уровня =====
 function updateLevel() {
     let newLevel = Math.floor(score / 10) + 1;
+
     if (newLevel !== level) {
         level = newLevel;
         levelEl.textContent = level;
 
+        // Увеличиваем скорость
         speed = 3 + level * 1.2;
+
+        // Частота спавна
         spawnRate = Math.max(400, 1100 - level * 120);
 
         clearInterval(blocksInterval);
@@ -120,7 +103,7 @@ function updateLevel() {
     }
 }
 
-// Конец игры
+// ===== Конец игры =====
 function endGame() {
     gameOver = true;
     clearInterval(blocksInterval);
@@ -132,7 +115,7 @@ function endGame() {
     explosion.style.left = playerX + "px";
     explosion.style.bottom = "10px";
     explosion.style.background = "url('explosion.png') no-repeat center / contain";
-    gameDiv.appendChild(explosion);
+    document.getElementById("game").appendChild(explosion);
     setTimeout(() => explosion.remove(), 1000);
 
     if (score > highScore) {
@@ -144,7 +127,7 @@ function endGame() {
     restartBtn.style.display = "block";
 }
 
-// Рестарт игры
+// ===== Рестарт игры =====
 function restartGame() {
     document.querySelectorAll(".block").forEach(b => b.remove());
 
@@ -156,7 +139,6 @@ function restartGame() {
     spawnRate = 1000;
 
     playerX = 130;
-    targetX = playerX;
     player.style.left = playerX + "px";
 
     gameOver = false;
@@ -165,49 +147,5 @@ function restartGame() {
     blocksInterval = setInterval(createBlock, spawnRate);
 }
 
-// Старт игры
+// ===== Старт игры =====
 blocksInterval = setInterval(createBlock, spawnRate);
-// Берём ракету и игровое поле
-const player = document.getElementById("player");
-const gameDiv = document.getElementById("game");
-
-// Текущая и целевая позиция ракеты
-let targetX = parseInt(player.style.left) || 130;
-let speedMove = 8; // скорость скольжения ракеты
-
-// ===== Плавное движение ракеты =====
-function animatePlayer() {
-    let playerX = parseInt(player.style.left) || 130;
-
-    if (Math.abs(playerX - targetX) < 1) {
-        player.style.left = targetX + "px";
-    } else if (playerX < targetX) {
-        player.style.left = (playerX + speedMove) + "px";
-    } else if (playerX > targetX) {
-        player.style.left = (playerX - speedMove) + "px";
-    }
-
-    requestAnimationFrame(animatePlayer);
-}
-animatePlayer();
-
-// ===== Свайп на телефоне =====
-gameDiv.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // отключаем скролл
-});
-
-gameDiv.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    let touchX = e.touches[0].clientX;
-
-    // Позиция относительно игрового поля
-    const rect = gameDiv.getBoundingClientRect();
-    let relativeX = touchX - rect.left;
-
-    // Ограничиваем движение ракеты внутри поля
-    targetX = Math.min(260, Math.max(0, relativeX - 20));
-});
-
-gameDiv.addEventListener("touchend", () => {
-    // просто оставляем ракеты в последней позиции
-});
