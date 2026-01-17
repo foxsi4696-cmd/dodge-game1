@@ -30,3 +30,20 @@
 <script src="script.js"></script>
 </body>
 </html>
+<div id="game">
+    <div id="player"></div>
+</div>
+
+<div>
+    Score: <span id="score">0</span> 
+    Highscore: <span id="highscore">0</span>
+    Level: <span id="level">1</span>
+</div>
+
+<div id="controls">
+    <button onclick="moveLeft()">⬅️</button>
+    <button onclick="moveRight()">➡️</button>
+</div>
+
+<button id="startBtn">START</button>
+<button id="restartBtn" onclick="restartGame()" style="display:none;">Restart</button>
