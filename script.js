@@ -20,7 +20,7 @@ const restartBtn = document.getElementById("restartBtn");
 highscoreEl.textContent = highScore;
 levelEl.textContent = level;
 
-// ПЛАВНОЕ ДВИЖЕНИЕ РАКЕТЫ
+// Плавное движение ракеты
 function animatePlayer() {
     if (Math.abs(playerX - targetX) < 1) {
         playerX = targetX;
@@ -34,7 +34,7 @@ function animatePlayer() {
 }
 animatePlayer();
 
-// КНОПКИ
+// Кнопки управления
 function moveLeft() {
     if (!gameOver) targetX = Math.max(0, targetX - 40);
 }
@@ -42,31 +42,34 @@ function moveRight() {
     if (!gameOver) targetX = Math.min(260, targetX + 40);
 }
 
-// СВАЙП НА ТАЧ
-let startX = 0;
+// Свайп для телефонов
 const gameDiv = document.getElementById("game");
 
-gameDiv.addEventListener("touchstart", e => {
-    startX = e.touches[0].clientX;
+gameDiv.addEventListener("touchstart", (e) => {
+    e.preventDefault();
 });
 
-gameDiv.addEventListener("touchmove", e => {
+gameDiv.addEventListener("touchmove", (e) => {
+    e.preventDefault();
     let touchX = e.touches[0].clientX;
-    let delta = touchX - startX;
-    targetX = Math.min(260, Math.max(0, playerX + delta));
+
+    const rect = gameDiv.getBoundingClientRect();
+    let relativeX = touchX - rect.left;
+
+    targetX = Math.min(260, Math.max(0, relativeX - 20)); // центр ракеты на пальце
 });
 
-gameDiv.addEventListener("touchend", () => {
+gameDiv.addEventListener("touchend", (e) => {
     playerX = targetX;
 });
 
-// СОЗДАНИЕ АСТЕРОИДОВ
+// Создание астероидов
 function createBlock() {
     if (gameOver) return;
 
     const lanes = [20, 130, 240];
     const lane = lanes[Math.floor(Math.random() * lanes.length)];
-    const count = Math.random() < 0.4 ? 2 : 1; // шанс двух астероидов
+    const count = Math.random() < 0.4 ? 2 : 1;
 
     for (let i = 0; i < count; i++) {
         const block = document.createElement("div");
@@ -87,12 +90,10 @@ function createBlock() {
             y += speed;
             block.style.top = y + "px";
 
-            // Столкновение с ракетой
             if (y > 340 && Math.abs(block.offsetLeft - playerX) < 35) {
                 endGame();
             }
 
-            // Ушел за экран
             if (y > 420) {
                 clearInterval(fall);
                 block.remove();
@@ -104,10 +105,9 @@ function createBlock() {
     }
 }
 
-// ОБНОВЛЕНИЕ УРОВНЯ
+// Обновление уровня
 function updateLevel() {
     let newLevel = Math.floor(score / 10) + 1;
-
     if (newLevel !== level) {
         level = newLevel;
         levelEl.textContent = level;
@@ -120,7 +120,7 @@ function updateLevel() {
     }
 }
 
-// КОНЕЦ ИГРЫ
+// Конец игры
 function endGame() {
     gameOver = true;
     clearInterval(blocksInterval);
@@ -144,7 +144,7 @@ function endGame() {
     restartBtn.style.display = "block";
 }
 
-// РЕСТАРТ
+// Рестарт игры
 function restartGame() {
     document.querySelectorAll(".block").forEach(b => b.remove());
 
@@ -165,5 +165,5 @@ function restartGame() {
     blocksInterval = setInterval(createBlock, spawnRate);
 }
 
-// СТАРТ ИГРЫ
+// Старт игры
 blocksInterval = setInterval(createBlock, spawnRate);
