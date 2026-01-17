@@ -167,3 +167,47 @@ function restartGame() {
 
 // Старт игры
 blocksInterval = setInterval(createBlock, spawnRate);
+// Берём ракету и игровое поле
+const player = document.getElementById("player");
+const gameDiv = document.getElementById("game");
+
+// Текущая и целевая позиция ракеты
+let targetX = parseInt(player.style.left) || 130;
+let speedMove = 8; // скорость скольжения ракеты
+
+// ===== Плавное движение ракеты =====
+function animatePlayer() {
+    let playerX = parseInt(player.style.left) || 130;
+
+    if (Math.abs(playerX - targetX) < 1) {
+        player.style.left = targetX + "px";
+    } else if (playerX < targetX) {
+        player.style.left = (playerX + speedMove) + "px";
+    } else if (playerX > targetX) {
+        player.style.left = (playerX - speedMove) + "px";
+    }
+
+    requestAnimationFrame(animatePlayer);
+}
+animatePlayer();
+
+// ===== Свайп на телефоне =====
+gameDiv.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // отключаем скролл
+});
+
+gameDiv.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    let touchX = e.touches[0].clientX;
+
+    // Позиция относительно игрового поля
+    const rect = gameDiv.getBoundingClientRect();
+    let relativeX = touchX - rect.left;
+
+    // Ограничиваем движение ракеты внутри поля
+    targetX = Math.min(260, Math.max(0, relativeX - 20));
+});
+
+gameDiv.addEventListener("touchend", () => {
+    // просто оставляем ракеты в последней позиции
+});
