@@ -1,1 +1,25 @@
+index.html
+style.css
+script.js
+manifest.json
+sw.js<!DOCTYPE html><html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Cube Dodge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00ff00">
 
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body><h2>Score: <span id="score">0</span></h2>
+<h3>Best: <span id="highscore">0</span></h3><div id="game">
+    <div id="player"></div>
+</div><div id="controls">
+    <button onclick="moveLeft()">⬅️</button>
+    <button onclick="moveRight()">➡️</button>
+</div><button id="restartBtn" onclick="restartGame()">🔁 Restart</button>
+
+<script src="script.js"></script></body>
+</html>
