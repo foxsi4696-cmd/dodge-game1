@@ -1,4 +1,7 @@
-let playerX = 130;
+let playerX = 130;        // текущая позиция ракеты
+let targetX = playerX;     // куда движется ракета
+let speedMove = 8;         // скорость скольжения ракеты
+
 let score = 0;
 let level = 1;
 let speed = 4;
@@ -17,36 +20,60 @@ const restartBtn = document.getElementById("restartBtn");
 highscoreEl.textContent = highScore;
 levelEl.textContent = level;
 
-// Движение ракеты
+// ПЛАВНОЕ ДВИЖЕНИЕ РАКЕТЫ
+function animatePlayer() {
+    if (Math.abs(playerX - targetX) < 1) {
+        playerX = targetX;
+    } else if (playerX < targetX) {
+        playerX += speedMove;
+    } else if (playerX > targetX) {
+        playerX -= speedMove;
+    }
+    player.style.left = playerX + "px";
+    requestAnimationFrame(animatePlayer);
+}
+animatePlayer();
+
+// КНОПКИ
 function moveLeft() {
-    if (playerX > 0 && !gameOver) {
-        playerX -= 20;
-        player.style.left = playerX + "px";
-    }
+    if (!gameOver) targetX = Math.max(0, targetX - 40);
 }
-
 function moveRight() {
-    if (playerX < 260 && !gameOver) {
-        playerX += 20;
-        player.style.left = playerX + "px";
-    }
+    if (!gameOver) targetX = Math.min(260, targetX + 40);
 }
 
-// Создание астероидов
+// СВАЙП НА ТАЧ
+let startX = 0;
+const gameDiv = document.getElementById("game");
+
+gameDiv.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+});
+
+gameDiv.addEventListener("touchmove", e => {
+    let touchX = e.touches[0].clientX;
+    let delta = touchX - startX;
+    targetX = Math.min(260, Math.max(0, playerX + delta));
+});
+
+gameDiv.addEventListener("touchend", () => {
+    playerX = targetX;
+});
+
+// СОЗДАНИЕ АСТЕРОИДОВ
 function createBlock() {
     if (gameOver) return;
 
     const lanes = [20, 130, 240];
     const lane = lanes[Math.floor(Math.random() * lanes.length)];
-
-    const count = Math.random() < 0.4 ? 2 : 1; // 40% шанс 2 астероида
+    const count = Math.random() < 0.4 ? 2 : 1; // шанс двух астероидов
 
     for (let i = 0; i < count; i++) {
         const block = document.createElement("div");
         block.className = "block";
         block.style.left = lane + "px";
         block.style.top = (-i * 60) + "px";
-        document.getElementById("game").appendChild(block);
+        gameDiv.appendChild(block);
 
         let y = -i * 60;
 
@@ -65,7 +92,7 @@ function createBlock() {
                 endGame();
             }
 
-            // Если астероид ушёл за экран
+            // Ушел за экран
             if (y > 420) {
                 clearInterval(fall);
                 block.remove();
@@ -77,7 +104,7 @@ function createBlock() {
     }
 }
 
-// Повышение уровня
+// ОБНОВЛЕНИЕ УРОВНЯ
 function updateLevel() {
     let newLevel = Math.floor(score / 10) + 1;
 
@@ -93,12 +120,11 @@ function updateLevel() {
     }
 }
 
-// Конец игры
+// КОНЕЦ ИГРЫ
 function endGame() {
     gameOver = true;
     clearInterval(blocksInterval);
 
-    // Взрыв
     const explosion = document.createElement("div");
     explosion.style.width = "50px";
     explosion.style.height = "50px";
@@ -106,7 +132,7 @@ function endGame() {
     explosion.style.left = playerX + "px";
     explosion.style.bottom = "10px";
     explosion.style.background = "url('explosion.png') no-repeat center / contain";
-    document.getElementById("game").appendChild(explosion);
+    gameDiv.appendChild(explosion);
     setTimeout(() => explosion.remove(), 1000);
 
     if (score > highScore) {
@@ -118,7 +144,7 @@ function endGame() {
     restartBtn.style.display = "block";
 }
 
-// Рестарт игры
+// РЕСТАРТ
 function restartGame() {
     document.querySelectorAll(".block").forEach(b => b.remove());
 
@@ -130,6 +156,7 @@ function restartGame() {
     spawnRate = 1000;
 
     playerX = 130;
+    targetX = playerX;
     player.style.left = playerX + "px";
 
     gameOver = false;
@@ -138,10 +165,5 @@ function restartGame() {
     blocksInterval = setInterval(createBlock, spawnRate);
 }
 
-// Старт игры
+// СТАРТ ИГРЫ
 blocksInterval = setInterval(createBlock, spawnRate);
-
-// Service Worker для PWA
-if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-}
