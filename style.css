@@ -1,26 +1,20 @@
-/* ОБЩИЕ СТИЛИ */
 body {
     background: #111;
     color: white;
     text-align: center;
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
 }
 
-/* ИГРОВОЕ ПОЛЕ */
 #game {
     width: 300px;
     height: 400px;
-    background: url("space.jpg") center / cover no-repeat;
+    background: url("space.jpg") center / cover;
     margin: 20px auto;
     position: relative;
     overflow: hidden;
     border: 2px solid #00ff00;
-    border-radius: 12px;
 }
 
-/* РАКЕТА */
 #player {
     width: 40px;
     height: 40px;
@@ -30,7 +24,6 @@ body {
     left: 130px;
 }
 
-/* АСТЕРОИДЫ */
 .block {
     width: 40px;
     height: 40px;
@@ -39,65 +32,18 @@ body {
     top: 0;
 }
 
-/* КНОПКИ УПРАВЛЕНИЯ */
 #controls button {
-    font-size: 28px;
-    padding: 15px 25px;
-    margin: 10px;
-    border-radius: 50%; /* круглые кнопки */
-    border: none;
-    background: linear-gradient(145deg, #00ff00, #009900);
-    color: white;
-    box-shadow: 0 5px #006600;
-    transition: all 0.1s ease-in-out;
-    cursor: pointer;
+    font-size: 24px;
+    padding: 10px 20px;
+    margin: 5px;
 }
 
-#controls button:active {
-    transform: translateY(3px);
-    box-shadow: 0 2px #006600;
-}
-
-/* КНОПКА РЕСТАРТА */
 #restartBtn {
     display: none;
-    margin-top: 20px;
-    padding: 15px 30px;
-    font-size: 20px;
-    border-radius: 12px;
+    margin-top: 15px;
+    padding: 12px 25px;
+    font-size: 18px;
+    border-radius: 10px;
     border: none;
-    background: linear-gradient(145deg, #ff9900, #cc6600);
-    color: white;
-    box-shadow: 0 5px #996600;
-    transition: all 0.1s ease-in-out;
-    cursor: pointer;
-}
-
-#restartBtn:active {
-    transform: translateY(3px);
-    box-shadow: 0 2px #996600;
-}
-
-/* АДАПТИВ ДЛЯ МОБИЛЬНЫХ */
-@media (max-width: 400px) {
-    #game {
-        width: 90%;
-        height: 60vw; /* сохраняем пропорцию */
-    }
-
-    #player, .block {
-        width: 12vw;
-        height: 12vw;
-    }
-
-    #controls button {
-        font-size: 20px;
-        padding: 12px 20px;
-        margin: 5px;
-    }
-
-    #restartBtn {
-        padding: 12px 20px;
-        font-size: 18px;
-    }
+    background: orange;
 }
