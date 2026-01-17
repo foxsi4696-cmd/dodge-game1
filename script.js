@@ -1,4 +1,4 @@
-let playerX = 130;        // текущая позиция ракеты
+let playerX = 130;
 let score = 0;
 let level = 1;
 let speed = 4;
@@ -17,45 +17,38 @@ const restartBtn = document.getElementById("restartBtn");
 highscoreEl.textContent = highScore;
 levelEl.textContent = level;
 
-// ===== Кнопки управления =====
+// Движение ракеты
 function moveLeft() {
-    if (!gameOver) playerX = Math.max(0, playerX - 40);
-    player.style.left = playerX + "px";
+    if (playerX > 0 && !gameOver) {
+        playerX -= 20;
+        player.style.left = playerX + "px";
+    }
 }
 
 function moveRight() {
-    if (!gameOver) playerX = Math.min(260, playerX + 40);
-    player.style.left = playerX + "px";
+    if (playerX < 260 && !gameOver) {
+        playerX += 20;
+        player.style.left = playerX + "px";
+    }
 }
 
-// ===== Создание астероидов =====
+// Создание астероидов
 function createBlock() {
     if (gameOver) return;
 
     const lanes = [20, 130, 240];
-    let selectedLanes = [];
+    const lane = lanes[Math.floor(Math.random() * lanes.length)];
 
-    if (level < 3) {
-        // Уровень 1 и 2: по 1 астероиду
-        selectedLanes.push(lanes[Math.floor(Math.random() * lanes.length)]);
-    } else {
-        // Уровень 3 и выше: по 2 астероида
-        let firstLane = lanes[Math.floor(Math.random() * lanes.length)];
-        let secondLane;
-        do {
-            secondLane = lanes[Math.floor(Math.random() * lanes.length)];
-        } while (secondLane === firstLane);
-        selectedLanes = [firstLane, secondLane];
-    }
+    const count = Math.random() < 0.4 ? 2 : 1; // шанс двух астероидов
 
-    for (let lane of selectedLanes) {
+    for (let i = 0; i < count; i++) {
         const block = document.createElement("div");
         block.className = "block";
         block.style.left = lane + "px";
-        block.style.top = "-60px";
+        block.style.top = (-i * 60) + "px";
         document.getElementById("game").appendChild(block);
 
-        let y = -60;
+        let y = -i * 60;
 
         const fall = setInterval(() => {
             if (gameOver) {
@@ -67,12 +60,10 @@ function createBlock() {
             y += speed;
             block.style.top = y + "px";
 
-            // Столкновение с ракетой
             if (y > 340 && Math.abs(block.offsetLeft - playerX) < 35) {
                 endGame();
             }
 
-            // Ушел за экран
             if (y > 420) {
                 clearInterval(fall);
                 block.remove();
@@ -84,7 +75,7 @@ function createBlock() {
     }
 }
 
-// ===== Обновление уровня =====
+// Повышение уровня
 function updateLevel() {
     let newLevel = Math.floor(score / 10) + 1;
 
@@ -92,10 +83,7 @@ function updateLevel() {
         level = newLevel;
         levelEl.textContent = level;
 
-        // Увеличиваем скорость
         speed = 3 + level * 1.2;
-
-        // Частота спавна
         spawnRate = Math.max(400, 1100 - level * 120);
 
         clearInterval(blocksInterval);
@@ -103,7 +91,7 @@ function updateLevel() {
     }
 }
 
-// ===== Конец игры =====
+// Конец игры
 function endGame() {
     gameOver = true;
     clearInterval(blocksInterval);
@@ -127,7 +115,7 @@ function endGame() {
     restartBtn.style.display = "block";
 }
 
-// ===== Рестарт игры =====
+// Рестарт
 function restartGame() {
     document.querySelectorAll(".block").forEach(b => b.remove());
 
@@ -147,5 +135,10 @@ function restartGame() {
     blocksInterval = setInterval(createBlock, spawnRate);
 }
 
-// ===== Старт игры =====
+// Старт игры
 blocksInterval = setInterval(createBlock, spawnRate);
+
+// Service Worker
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+}
