@@ -144,3 +144,28 @@ window.restartGame = function () {
 startGame();
 
 };
+function endGame() {
+  gameOver = true;
+  clearInterval(spawnInterval);
+  restartBtn.style.display = "block";
+
+  // Создаем взрыв на месте ракеты
+  const explosion = document.createElement("div");
+  explosion.style.width = "40px";
+  explosion.style.height = "40px";
+  explosion.style.position = "absolute";
+  explosion.style.left = playerX + "px";
+  explosion.style.bottom = "10px";
+  explosion.style.background = 'url("explosion.png") no-repeat center / contain';
+  game.appendChild(explosion);
+
+  // Удаляем взрыв через 500 мс
+  setTimeout(() => explosion.remove(), 500);
+
+  // Сохраняем рекорд
+  if (score > highscore) {
+    highscore = score;
+    localStorage.setItem("highscore", highscore);
+    highscoreEl.textContent = highscore;
+  }
+}
