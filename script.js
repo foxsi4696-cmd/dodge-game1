@@ -2,6 +2,7 @@ window.onload = function () {
 
 let playerX = 130;
 let score = 0;
+let highscore = 0;
 let level = 1;
 let speed = 4;
 let gameOver = false;
@@ -11,6 +12,7 @@ const player = document.getElementById("player");
 const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
+const highscoreEl = document.getElementById("highscore");
 const restartBtn = document.getElementById("restartBtn");
 
 // ===== УПРАВЛЕНИЕ =====
@@ -35,6 +37,7 @@ function startGame() {
 
   scoreEl.textContent = score;
   levelEl.textContent = level;
+  highscoreEl.textContent = highscore;
 
   restartBtn.style.display = "none";
 
@@ -52,6 +55,7 @@ function createAsteroid() {
   const asteroid = document.createElement("div");
   asteroid.className = "block";
 
+  // Выбор типа астероида
   let type = "red";
   if (level >= 3) {
     const types = ["red", "blue", "yellow"];
@@ -84,13 +88,15 @@ function createAsteroid() {
       asteroid.style.left = x + "px";
     }
 
-    // Столкновение
-    if (y > 330 && Math.abs(lane - playerX) < 35) {
+    // Столкновение с ракетой
+    let asteroidX = parseInt(asteroid.style.left);
+    if (y > 330 && Math.abs(asteroidX - playerX) < 35) {
       endGame();
       clearInterval(fall);
       asteroid.remove();
     }
 
+    // Ушел за экран
     if (y > 420) {
       clearInterval(fall);
       asteroid.remove();
@@ -111,11 +117,17 @@ function updateLevel() {
   }
 }
 
-// ===== GAME OVER =====
+// ===== КОНЕЦ ИГРЫ =====
 function endGame() {
   gameOver = true;
   clearInterval(spawnInterval);
   restartBtn.style.display = "block";
+
+  // Сохраняем рекорд
+  if (score > highscore) {
+    highscore = score;
+    highscoreEl.textContent = highscore;
+  }
 }
 
 // ===== RESTART =====
@@ -126,7 +138,7 @@ window.restartGame = function () {
   startGame();
 };
 
-// Автостарт при загрузке
+// Автостарт игры
 startGame();
 
 };
