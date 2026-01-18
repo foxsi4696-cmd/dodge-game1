@@ -1,49 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Cube Dodge Space</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#00ff00">
+<meta charset="UTF-8">
+<title>Space Game</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Score: <span id="score">0</span></h2>
-<h3>Best: <span id="highscore">0</span></h3>
-<h3>Level: <span id="level">1</span></h3>
-
 <div id="game">
-    <div id="player"></div>
+  <div id="player"></div>
+</div>
+
+<div class="info">
+  Score: <span id="score">0</span> |
+  Level: <span id="level">1</span> |
+  Highscore: <span id="highscore">0</span>
 </div>
 
 <div id="controls">
-    <button onclick="moveLeft()">⬅️</button>
-    <button onclick="moveRight()">➡️</button>
+  <button onclick="moveLeft()">⬅️</button>
+  <button onclick="moveRight()">➡️</button>
 </div>
 
-<button id="restartBtn" onclick="restartGame()">🔁 Restart</button>
+<button id="startBtn">START</button>
+<button id="restartBtn" onclick="restartGame()">RESTART</button>
 
 <script src="script.js"></script>
 </body>
 </html>
-<div id="game">
-    <div id="player"></div>
-</div>
-
-<div>
-    Score: <span id="score">0</span> 
-    Highscore: <span id="highscore">0</span>
-    Level: <span id="level">1</span>
-</div>
-
-<div id="controls">
-    <button onclick="moveLeft()">⬅️</button>
-    <button onclick="moveRight()">➡️</button>
-</div>
-
-<button id="startBtn">START</button>
-<button id="restartBtn" onclick="restartGame()" style="display:none;">Restart</button>
