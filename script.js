@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.onload = () => {
   const player = document.getElementById("player");
   const game = document.getElementById("game");
   const scoreEl = document.getElementById("score");
@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const highscoreEl = document.getElementById("highscore");
   const restartBtn = document.getElementById("restartBtn");
 
-  let playerX = game.clientWidth / 2 - 24; // центр по ширине
+  let playerX = game.clientWidth / 2 - 24;
   player.style.left = playerX + "px";
 
   let score = 0;
@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let asteroids = [];
   let gameOver = false;
 
-  // ==== Управление ====
   function moveLeft() {
     playerX -= 20;
     if(playerX < 0) playerX = 0;
@@ -33,10 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
   window.moveLeft = moveLeft;
   window.moveRight = moveRight;
 
-  // ==== Астероиды ====
   function spawnAsteroid() {
     if(gameOver) return;
-
     const asteroid = document.createElement("div");
     asteroid.className = "block";
     asteroid.style.left = Math.floor(Math.random() * (game.clientWidth - 40)) + "px";
@@ -50,13 +47,12 @@ document.addEventListener("DOMContentLoaded", () => {
     for(let i = asteroids.length - 1; i >= 0; i--) {
       const a = asteroids[i];
       let y = parseInt(a.style.top);
-      y += 4 + level; // скорость
+      y += 4 + level;
       a.style.top = y + "px";
 
       const playerRect = player.getBoundingClientRect();
       const aRect = a.getBoundingClientRect();
 
-      // столкновение
       if(!(playerRect.right < aRect.left ||
            playerRect.left > aRect.right ||
            playerRect.bottom < aRect.top ||
@@ -66,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // астероид ушёл вниз
       if(y > game.clientHeight) {
         a.remove();
         asteroids.splice(i,1);
@@ -85,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ==== Взрыв ====
   function createExplosion(x, y) {
     const exp = document.createElement("div");
     exp.className = "explosion";
@@ -95,13 +89,11 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => exp.remove(), 500);
   }
 
-  // ==== Конец игры ====
   function endGame() {
     gameOver = true;
     restartBtn.style.display = "block";
   }
 
-  // ==== Рестарт ====
   function restartGame() {
     asteroids.forEach(a => a.remove());
     asteroids = [];
@@ -116,12 +108,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   window.restartGame = restartGame;
 
-  // ==== Цикл игры ====
   setInterval(spawnAsteroid, 1000);
+
   function gameLoop() {
     updateAsteroids();
     requestAnimationFrame(gameLoop);
   }
 
   gameLoop();
-});
+};
