@@ -1,3 +1,4 @@
+alert("JS работает");
 let playerX = 130;
 let score = 0;
 let level = 1;
