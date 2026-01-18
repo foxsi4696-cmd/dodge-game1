@@ -2,7 +2,7 @@ window.onload = function () {
 
 let playerX = 130;
 let score = 0;
-let highscore = 0;
+let highscore = localStorage.getItem("highscore") || 0; // берем рекорд из памяти
 let level = 1;
 let speed = 4;
 let gameOver = false;
@@ -14,6 +14,9 @@ const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 const highscoreEl = document.getElementById("highscore");
 const restartBtn = document.getElementById("restartBtn");
+
+// Отображаем рекорд сразу
+highscoreEl.textContent = highscore;
 
 // ===== УПРАВЛЕНИЕ =====
 window.moveLeft = function () {
@@ -37,7 +40,6 @@ function startGame() {
 
   scoreEl.textContent = score;
   levelEl.textContent = level;
-  highscoreEl.textContent = highscore;
 
   restartBtn.style.display = "none";
 
@@ -96,7 +98,6 @@ function createAsteroid() {
       asteroid.remove();
     }
 
-    // Ушел за экран
     if (y > 420) {
       clearInterval(fall);
       asteroid.remove();
@@ -123,9 +124,10 @@ function endGame() {
   clearInterval(spawnInterval);
   restartBtn.style.display = "block";
 
-  // Сохраняем рекорд
+  // Сохраняем рекорд в localStorage
   if (score > highscore) {
     highscore = score;
+    localStorage.setItem("highscore", highscore);
     highscoreEl.textContent = highscore;
   }
 }
