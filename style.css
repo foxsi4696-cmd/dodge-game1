@@ -9,11 +9,9 @@ html, body {
   height: 100%;
   overflow: hidden;
   background: black;
-  touch-action: none;
   font-family: Arial, sans-serif;
 }
 
-/* ИГРОВОЕ ПОЛЕ */
 #game {
   position: relative;
   width: 100vw;
@@ -22,7 +20,6 @@ html, body {
   overflow: hidden;
 }
 
-/* РАКЕТА */
 #player {
   position: absolute;
   bottom: 20px;
@@ -32,17 +29,16 @@ html, body {
   transform: translateX(-50%);
   background: url("rocket.png") no-repeat center / contain;
   image-rendering: pixelated;
+  z-index: 5;
 }
 
-/* АСТЕРОИДЫ */
-.asteroid {
+.block {
   position: absolute;
   width: 40px;
   height: 40px;
   image-rendering: pixelated;
 }
 
-/* ВЗРЫВ */
 .explosion {
   position: absolute;
   width: 48px;
@@ -52,18 +48,16 @@ html, body {
   image-rendering: pixelated;
 }
 
-/* СЧЁТ */
-#hud {
+.info {
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   z-index: 10;
 }
 
-/* КНОПКИ */
 #controls {
   position: absolute;
   bottom: 20px;
@@ -74,11 +68,22 @@ html, body {
   z-index: 10;
 }
 
-.control-btn {
+#controls button {
   width: 60px;
   height: 60px;
   font-size: 28px;
   border-radius: 12px;
   border: none;
   background: rgba(255,255,255,0.85);
+}
+
+#restartBtn {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  font-size: 16px;
+  z-index: 10;
+  display: none;
 }
