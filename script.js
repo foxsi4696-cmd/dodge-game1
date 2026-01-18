@@ -1,39 +1,37 @@
-window.onload = function () {
-
 let playerX = 130;
 let score = 0;
 let level = 1;
 let speed = 4;
-let gameOver = true;
+let gameOver = false;
 let spawnInterval = null;
 
 const player = document.getElementById("player");
 const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
-const startBtn = document.getElementById("startBtn");
 const restartBtn = document.getElementById("restartBtn");
 
+// Устанавливаем начальные значения
+player.style.left = playerX + "px";
+scoreEl.textContent = score;
+levelEl.textContent = level;
+
 // ===== УПРАВЛЕНИЕ =====
-window.moveLeft = function () {
-  if (gameOver) return;
-  playerX = Math.max(0, playerX - 40);
-  player.style.left = playerX + "px";
-};
+function moveLeft() {
+  if (!gameOver) {
+    playerX = Math.max(0, playerX - 40);
+    player.style.left = playerX + "px";
+  }
+}
 
-window.moveRight = function () {
-  if (gameOver) return;
-  playerX = Math.min(260, playerX + 40);
-  player.style.left = playerX + "px";
-};
+function moveRight() {
+  if (!gameOver) {
+    playerX = Math.min(260, playerX + 40);
+    player.style.left = playerX + "px";
+  }
+}
 
-// ===== START =====
-startBtn.onclick = function () {
-  startBtn.style.display = "none";
-  restartBtn.style.display = "none";
-  startGame();
-};
-
+// ===== ЗАПУСК ИГРЫ =====
 function startGame() {
   gameOver = false;
   score = 0;
@@ -43,28 +41,38 @@ function startGame() {
   scoreEl.textContent = score;
   levelEl.textContent = level;
 
-  clearInterval(spawnInterval);
-  spawnInterval = setInterval(spawnAsteroid, 1000);
+  if (spawnInterval) {
+    clearInterval(spawnInterval);
+  }
+  spawnInterval = setInterval(createAsteroid, 1000);
 }
 
-// ===== АСТЕРОИД =====
-function spawnAsteroid() {
+// ===== СОЗДАНИЕ АСТЕРОИДОВ =====
+function createAsteroid() {
   if (gameOver) return;
 
   const lanes = [20, 130, 240];
-  const lane = lanes[Math.floor(Math.random() * lanes.length)];
-
+  let lane = lanes[Math.floor(Math.random() * lanes.length)];
+  
   const asteroid = document.createElement("div");
   asteroid.className = "block";
+  
+  let type = "red";
+  if (level >= 3) {
+    const types = ["red", "blue", "yellow"];
+    type = types[Math.floor(Math.random() * types.length)];
+  }
+  
+  asteroid.style.background = `url("asteroid_${type}.png") no-repeat center / contain`;
   asteroid.style.left = lane + "px";
   asteroid.style.top = "-40px";
-  asteroid.style.background =
-    'url("asteroid_red.png") no-repeat center / contain';
-
+  
   game.appendChild(asteroid);
-
+  
   let y = -40;
-
+  let zigzag = type === "blue" ? (Math.random() < 0.5 ? 1 : -1) : 0;
+  let localSpeed = type === "yellow" ? speed + 2 : speed;
+  
   const fall = setInterval(() => {
     if (gameOver) {
       clearInterval(fall);
@@ -72,44 +80,57 @@ function spawnAsteroid() {
       return;
     }
 
-    y += speed;
+    y += localSpeed;
     asteroid.style.top = y + "px";
 
-    // столкновение
-    if (y > 330 && Math.abs(lane - playerX) < 40) {
+    if (type === "blue") {
+      let x = parseInt(asteroid.style.left) + zigzag;
+      if (x < 0 || x > 260) zigzag *= -1;
+      asteroid.style.left = x + "px";
+    }
+
+    // Столкновение с ракетой
+    if (y > 330 && Math.abs(lane - playerX) < 35) {
       endGame();
       clearInterval(fall);
       asteroid.remove();
     }
 
+    // Если астероид ушёл вниз
     if (y > 420) {
       clearInterval(fall);
       asteroid.remove();
       score++;
       scoreEl.textContent = score;
-
-      if (score % 10 === 0) {
-        level++;
-        levelEl.textContent = level;
-        speed++;
-      }
+      updateLevel();
     }
   }, 20);
 }
 
-// ===== GAME OVER =====
+// ===== УРОВНИ =====
+function updateLevel() {
+  let newLevel = Math.floor(score / 10) + 1;
+  if (newLevel !== level) {
+    level = newLevel;
+    levelEl.textContent = level;
+    speed += 1; // Увеличиваем скорость
+  }
+}
+
+// ===== КОНЕЦ ИГРЫ =====
 function endGame() {
   gameOver = true;
   clearInterval(spawnInterval);
-  restartBtn.style.display = "inline-block";
+  restartBtn.style.display = "block";
 }
 
 // ===== RESTART =====
-window.restartGame = function () {
+function restartGame() {
   document.querySelectorAll(".block").forEach(b => b.remove());
   playerX = 130;
   player.style.left = playerX + "px";
   startGame();
-};
+}
 
-};
+// Автоматический старт игры при загрузке
+window.onload = function
