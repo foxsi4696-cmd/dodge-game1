@@ -1,13 +1,3 @@
-window.onload = function () {
-
-let playerX = 130;
-let score = 0;
-let highscore = localStorage.getItem("highscore") || 0; // берем рекорд из памяти
-let level = 1;
-let speed = 4;
-let gameOver = false;
-let spawnInterval = null;
-
 const player = document.getElementById("player");
 const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
@@ -15,157 +5,118 @@ const levelEl = document.getElementById("level");
 const highscoreEl = document.getElementById("highscore");
 const restartBtn = document.getElementById("restartBtn");
 
-// Отображаем рекорд сразу
+let playerX = game.clientWidth / 2 - 24;
+player.style.left = playerX + "px";
+
+let score = 0;
+let level = 1;
+let highscore = localStorage.getItem("highscore") || 0;
 highscoreEl.textContent = highscore;
 
+let asteroids = [];
+let gameOver = false;
+
 // ===== УПРАВЛЕНИЕ =====
-window.moveLeft = function () {
-  if (gameOver) return;
-  playerX = Math.max(0, playerX - 40);
+function moveLeft() {
+  playerX -= 20;
+  if(playerX < 0) playerX = 0;
   player.style.left = playerX + "px";
-};
-
-window.moveRight = function () {
-  if (gameOver) return;
-  playerX = Math.min(260, playerX + 40);
-  player.style.left = playerX + "px";
-};
-
-// ===== ЗАПУСК ИГРЫ =====
-function startGame() {
-  gameOver = false;
-  score = 0;
-  level = 1;
-  speed = 4;
-
-  scoreEl.textContent = score;
-  levelEl.textContent = level;
-
-  restartBtn.style.display = "none";
-
-  if (spawnInterval) clearInterval(spawnInterval);
-  spawnInterval = setInterval(createAsteroid, 1000);
 }
 
-// ===== СОЗДАНИЕ АСТЕРОИДОВ =====
-function createAsteroid() {
-  if (gameOver) return;
+function moveRight() {
+  playerX += 20;
+  if(playerX > game.clientWidth - 48) playerX = game.clientWidth - 48;
+  player.style.left = playerX + "px";
+}
 
-  const lanes = [20, 130, 240];
-  let lane = lanes[Math.floor(Math.random() * lanes.length)];
-
+// ===== АСТЕРОИДЫ =====
+function spawnAsteroid() {
+  if(gameOver) return;
+  
   const asteroid = document.createElement("div");
   asteroid.className = "block";
-
-  // Выбор типа астероида
-  let type = "red";
-  if (level >= 3) {
-    const types = ["red", "blue", "yellow"];
-    type = types[Math.floor(Math.random() * types.length)];
-  }
-
-  asteroid.style.background = `url("asteroid_${type}.png") no-repeat center / contain`;
-  asteroid.style.left = lane + "px";
+  asteroid.style.left = Math.floor(Math.random() * (game.clientWidth - 40)) + "px";
   asteroid.style.top = "-40px";
-
+  asteroid.style.background = 'url("asteroid.png") no-repeat center / contain';
   game.appendChild(asteroid);
+  asteroids.push(asteroid);
+}
 
-  let y = -40;
-  let zigzag = type === "blue" ? (Math.random() < 0.5 ? 1 : -1) : 0;
-  let localSpeed = type === "yellow" ? speed + 2 : speed;
+function updateAsteroids() {
+  for(let i = asteroids.length - 1; i >= 0; i--) {
+    const a = asteroids[i];
+    let y = parseInt(a.style.top);
+    y += 4 + level;
+    a.style.top = y + "px";
 
-  const fall = setInterval(() => {
-    if (gameOver) {
-      clearInterval(fall);
-      asteroid.remove();
+    const playerRect = player.getBoundingClientRect();
+    const aRect = a.getBoundingClientRect();
+
+    // столкновение
+    if(!(playerRect.right < aRect.left ||
+         playerRect.left > aRect.right ||
+         playerRect.bottom < aRect.top ||
+         playerRect.top > aRect.bottom)) {
+      createExplosion(playerRect.left, playerRect.top);
+      endGame();
       return;
     }
 
-    y += localSpeed;
-    asteroid.style.top = y + "px";
-
-    if (type === "blue") {
-      let x = parseInt(asteroid.style.left) + zigzag;
-      if (x < 0 || x > 260) zigzag *= -1;
-      asteroid.style.left = x + "px";
-    }
-
-    // Столкновение с ракетой
-    let asteroidX = parseInt(asteroid.style.left);
-    if (y > 330 && Math.abs(asteroidX - playerX) < 35) {
-      endGame();
-      clearInterval(fall);
-      asteroid.remove();
-    }
-
-    if (y > 420) {
-      clearInterval(fall);
-      asteroid.remove();
+    // астероид ушёл вниз
+    if(y > game.clientHeight) {
+      a.remove();
+      asteroids.splice(i,1);
       score++;
       scoreEl.textContent = score;
-      updateLevel();
+      if(score % 10 === 0) {
+        level++;
+        levelEl.textContent = level;
+      }
+      if(score > highscore) {
+        highscore = score;
+        highscoreEl.textContent = highscore;
+        localStorage.setItem("highscore", highscore);
+      }
     }
-  }, 20);
+  }
 }
 
-// ===== УРОВНИ =====
-function updateLevel() {
-  let newLevel = Math.floor(score / 10) + 1;
-  if (newLevel !== level) {
-    level = newLevel;
-    levelEl.textContent = level;
-    speed++;
-  }
+// ===== ВЗРЫВ =====
+function createExplosion(x, y) {
+  const exp = document.createElement("div");
+  exp.className = "explosion";
+  exp.style.left = x + "px";
+  exp.style.top = y + "px";
+  game.appendChild(exp);
+  setTimeout(() => exp.remove(), 500);
 }
 
 // ===== КОНЕЦ ИГРЫ =====
 function endGame() {
   gameOver = true;
-  clearInterval(spawnInterval);
   restartBtn.style.display = "block";
-
-  // Сохраняем рекорд в localStorage
-  if (score > highscore) {
-    highscore = score;
-    localStorage.setItem("highscore", highscore);
-    highscoreEl.textContent = highscore;
-  }
 }
 
-// ===== RESTART =====
-window.restartGame = function () {
-  document.querySelectorAll(".block").forEach(b => b.remove());
-  playerX = 130;
+// ===== РЕСТАРТ =====
+function restartGame() {
+  asteroids.forEach(a => a.remove());
+  asteroids = [];
+  score = 0;
+  level = 1;
+  scoreEl.textContent = score;
+  levelEl.textContent = level;
+  playerX = game.clientWidth / 2 - 24;
   player.style.left = playerX + "px";
-  startGame();
-};
-
-// Автостарт игры
-startGame();
-
-};
-function endGame() {
-  gameOver = true;
-  clearInterval(spawnInterval);
-  restartBtn.style.display = "block";
-
-  // Создаем взрыв на месте ракеты
-  const explosion = document.createElement("div");
-  explosion.style.width = "40px";
-  explosion.style.height = "40px";
-  explosion.style.position = "absolute";
-  explosion.style.left = playerX + "px";
-  explosion.style.bottom = "10px";
-  explosion.style.background = 'url("explosion.png") no-repeat center / contain';
-  game.appendChild(explosion);
-
-  // Удаляем взрыв через 500 мс
-  setTimeout(() => explosion.remove(), 500);
-
-  // Сохраняем рекорд
-  if (score > highscore) {
-    highscore = score;
-    localStorage.setItem("highscore", highscore);
-    highscoreEl.textContent = highscore;
-  }
+  gameOver = false;
+  restartBtn.style.display = "none";
 }
+
+// ===== ЦИКЛ ИГРЫ =====
+setInterval(spawnAsteroid, 1000);
+
+function gameLoop() {
+  updateAsteroids();
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
