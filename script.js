@@ -1,3 +1,5 @@
+window.onload = function () {
+
 let playerX = 130;
 let score = 0;
 let level = 1;
@@ -12,25 +14,25 @@ const levelEl = document.getElementById("level");
 const startBtn = document.getElementById("startBtn");
 const restartBtn = document.getElementById("restartBtn");
 
-// ===== КНОПКИ =====
-function moveLeft() {
+// ===== УПРАВЛЕНИЕ =====
+window.moveLeft = function () {
   if (gameOver) return;
   playerX = Math.max(0, playerX - 40);
   player.style.left = playerX + "px";
-}
+};
 
-function moveRight() {
+window.moveRight = function () {
   if (gameOver) return;
   playerX = Math.min(260, playerX + 40);
   player.style.left = playerX + "px";
-}
+};
 
 // ===== START =====
-startBtn.addEventListener("click", () => {
+startBtn.onclick = function () {
   startBtn.style.display = "none";
   restartBtn.style.display = "none";
   startGame();
-});
+};
 
 function startGame() {
   gameOver = false;
@@ -74,10 +76,7 @@ function spawnAsteroid() {
     asteroid.style.top = y + "px";
 
     // столкновение
-    if (
-      y > 330 &&
-      Math.abs(lane - playerX) < 40
-    ) {
+    if (y > 330 && Math.abs(lane - playerX) < 40) {
       endGame();
       clearInterval(fall);
       asteroid.remove();
@@ -106,9 +105,11 @@ function endGame() {
 }
 
 // ===== RESTART =====
-function restartGame() {
+window.restartGame = function () {
   document.querySelectorAll(".block").forEach(b => b.remove());
   playerX = 130;
   player.style.left = playerX + "px";
   startGame();
-}
+};
+
+};
