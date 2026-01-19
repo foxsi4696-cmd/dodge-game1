@@ -32,16 +32,23 @@ function moveRight() {
     playerX += 20;
     player.style.left = playerX + "px";
   }
-}
-
-/* АСТЕРОИД */
 function createAsteroid() {
   if (gameOver) return;
 
   const a = document.createElement("div");
   a.className = "block";
+
+  const img = asteroidImages[
+    Math.floor(Math.random() * asteroidImages.length)
+  ];
+
+  a.style.backgroundImage = `url(${img})`;
+  a.style.backgroundSize = "contain";
+  a.style.backgroundRepeat = "no-repeat";
+
   a.style.left = Math.floor(Math.random() * 260) + "px";
   a.style.top = "-40px";
+
   game.appendChild(a);
   asteroids.push(a);
 }
