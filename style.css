@@ -1,45 +1,51 @@
 body {
+  margin: 0;
+  padding: 0;
   background: black;
   color: white;
+  font-family: Arial, sans-serif;
   text-align: center;
-  font-family: Arial;
 }
 
 #game {
+  position: relative;
   width: 300px;
   height: 400px;
-  background: url(space.png);
-  position: relative;
+  margin: 20px auto;
+  background: url("space.jpg") no-repeat center / cover;
+  border: 2px solid white;
   overflow: hidden;
 }
 
 #player {
-  width: 40px;
-  height: 40px;
   position: absolute;
   bottom: 10px;
+  left: 130px;
+  width: 40px;
+  height: 40px;
+  background: url("rocket.png") no-repeat center / contain;
 }
 
 .block {
+  position: absolute;
   width: 40px;
   height: 40px;
-  position: absolute;
 }
 
-/* ВЗРЫВ */
-.explosion {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: url("explosion.png") no-repeat center / contain;
+#controls {
+  margin-top: 10px;
 }
 
 #controls button {
-  font-size: 24px;
-  margin: 10px;
+  font-size: 22px;
+  padding: 8px 16px;
+  margin: 3px;
 }
 
 #restartBtn {
   display: none;
-  margin-top: 10px;
+  margin: 10px auto;
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
 }
