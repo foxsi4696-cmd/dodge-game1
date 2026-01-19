@@ -6,31 +6,24 @@ body {
 }
 
 #game {
-  position: relative;
   width: 300px;
   height: 400px;
-  margin: 20px auto;
-  background: url("space.jpg") no-repeat center / cover;
+  background: url(space.png);
+  position: relative;
   overflow: hidden;
-  border: 2px solid white;
 }
 
-/* РАКЕТА */
 #player {
+  width: 40px;
+  height: 40px;
   position: absolute;
   bottom: 10px;
-  left: 130px;
-  width: 40px;
-  height: 40px;
-  background: url("rocket.png") no-repeat center / contain;
 }
 
-/* АСТЕРОИД */
 .block {
-  position: absolute;
   width: 40px;
   height: 40px;
-  background: url("asteroid.png") no-repeat center / contain;
+  position: absolute;
 }
 
 /* ВЗРЫВ */
