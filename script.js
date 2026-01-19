@@ -1,119 +1,110 @@
-window.onload = () => {
-  const player = document.getElementById("player");
-  const game = document.getElementById("game");
-  const scoreEl = document.getElementById("score");
-  const levelEl = document.getElementById("level");
-  const highscoreEl = document.getElementById("highscore");
-  const restartBtn = document.getElementById("restartBtn");
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const scoreEl = document.getElementById("score");
+const levelEl = document.getElementById("level");
+const highscoreEl = document.getElementById("highscore");
+const restartBtn = document.getElementById("restartBtn");
 
-  let playerX = game.clientWidth / 2 - 24;
-  player.style.left = playerX + "px";
+let playerX = 130;
+let score = 0;
+let level = 1;
+let gameOver = false;
+let asteroids = [];
 
-  let score = 0;
-  let level = 1;
-  let highscore = localStorage.getItem("highscore") || 0;
-  highscoreEl.textContent = highscore;
+let highscore = localStorage.getItem("highscore") || 0;
+highscoreEl.textContent = highscore;
 
-  let asteroids = [];
-  let gameOver = false;
-
-  function moveLeft() {
+/* УПРАВЛЕНИЕ */
+function moveLeft() {
+  if (playerX > 0) {
     playerX -= 20;
-    if(playerX < 0) playerX = 0;
     player.style.left = playerX + "px";
   }
+}
 
-  function moveRight() {
+function moveRight() {
+  if (playerX < 260) {
     playerX += 20;
-    if(playerX > game.clientWidth - 48) playerX = game.clientWidth - 48;
     player.style.left = playerX + "px";
   }
+}
 
-  window.moveLeft = moveLeft;
-  window.moveRight = moveRight;
+/* АСТЕРОИД */
+function createAsteroid() {
+  if (gameOver) return;
 
-  function spawnAsteroid() {
-    if(gameOver) return;
-    const asteroid = document.createElement("div");
-    asteroid.className = "block";
-    asteroid.style.left = Math.floor(Math.random() * (game.clientWidth - 40)) + "px";
-    asteroid.style.top = "-40px";
-    asteroid.style.background = 'url("asteroid.png") no-repeat center / contain';
-    game.appendChild(asteroid);
-    asteroids.push(asteroid);
-  }
+  const a = document.createElement("div");
+  a.className = "block";
+  a.style.left = Math.floor(Math.random() * 260) + "px";
+  a.style.top = "-40px";
+  game.appendChild(a);
+  asteroids.push(a);
+}
 
-  function updateAsteroids() {
-    for(let i = asteroids.length - 1; i >= 0; i--) {
-      const a = asteroids[i];
-      let y = parseInt(a.style.top);
-      y += 4 + level;
-      a.style.top = y + "px";
+/* ВЗРЫВ */
+function explosion(x, y) {
+  const e = document.createElement("div");
+  e.className = "explosion";
+  e.style.left = x + "px";
+  e.style.top = y + "px";
+  game.appendChild(e);
+  setTimeout(() => e.remove(), 400);
+}
 
-      const playerRect = player.getBoundingClientRect();
-      const aRect = a.getBoundingClientRect();
+/* ОБНОВЛЕНИЕ */
+function update() {
+  if (gameOver) return;
 
-      if(!(playerRect.right < aRect.left ||
-           playerRect.left > aRect.right ||
-           playerRect.bottom < aRect.top ||
-           playerRect.top > aRect.bottom)) {
-        createExplosion(playerRect.left, playerRect.top);
-        endGame();
-        return;
+  for (let i = asteroids.length - 1; i >= 0; i--) {
+    const a = asteroids[i];
+    a.style.top = a.offsetTop + (2 + level) + "px";
+
+    if (
+      a.offsetTop + 40 >= 350 &&
+      a.offsetLeft < playerX + 40 &&
+      a.offsetLeft + 40 > playerX
+    ) {
+      explosion(playerX, 350);
+      endGame();
+    }
+
+    if (a.offsetTop > 400) {
+      a.remove();
+      asteroids.splice(i, 1);
+      score++;
+      scoreEl.textContent = score;
+
+      if (score % 10 === 0) {
+        level++;
+        levelEl.textContent = level;
       }
 
-      if(y > game.clientHeight) {
-        a.remove();
-        asteroids.splice(i,1);
-        score++;
-        scoreEl.textContent = score;
-        if(score % 10 === 0) {
-          level++;
-          levelEl.textContent = level;
-        }
-        if(score > highscore) {
-          highscore = score;
-          highscoreEl.textContent = highscore;
-          localStorage.setItem("highscore", highscore);
-        }
+      if (score > highscore) {
+        highscore = score;
+        highscoreEl.textContent = highscore;
+        localStorage.setItem("highscore", highscore);
       }
     }
   }
+}
 
-  function createExplosion(x, y) {
-    const exp = document.createElement("div");
-    exp.className = "explosion";
-    exp.style.left = x + "px";
-    exp.style.top = y + "px";
-    game.appendChild(exp);
-    setTimeout(() => exp.remove(), 500);
-  }
+/* КОНЕЦ */
+function endGame() {
+  gameOver = true;
+  restartBtn.style.display = "block";
+}
 
-  function endGame() {
-    gameOver = true;
-    restartBtn.style.display = "block";
-  }
+/* РЕСТАРТ */
+function restartGame() {
+  asteroids.forEach(a => a.remove());
+  asteroids = [];
+  score = 0;
+  level = 1;
+  scoreEl.textContent = 0;
+  levelEl.textContent = 1;
+  gameOver = false;
+  restartBtn.style.display = "none";
+}
 
-  function restartGame() {
-    asteroids.forEach(a => a.remove());
-    asteroids = [];
-    score = 0;
-    level = 1;
-    scoreEl.textContent = score;
-    levelEl.textContent = level;
-    playerX = game.clientWidth / 2 - 24;
-    player.style.left = playerX + "px";
-    gameOver = false;
-    restartBtn.style.display = "none";
-  }
-  window.restartGame = restartGame;
-
-  setInterval(spawnAsteroid, 1000);
-
-  function gameLoop() {
-    updateAsteroids();
-    requestAnimationFrame(gameLoop);
-  }
-
-  gameLoop();
-};
+setInterval(createAsteroid, 1000);
+setInterval(update, 20);
