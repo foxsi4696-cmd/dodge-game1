@@ -1,101 +1,162 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.onload = function () {
 
-const game = document.getElementById("game");
+let playerX = 130;
+let score = 0;
+let highscore = localStorage.getItem("highscore") || 0;
+let level = 1;
+let speed = 4;
+let gameOver = false;
+let spawnInterval = null;
+
 const player = document.getElementById("player");
+const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 const highscoreEl = document.getElementById("highscore");
+const restartBtn = document.getElementById("restartBtn");
 
-let asteroids = [];
-let score = 0;
-let level = 1;
-let gameOver = false;
+// Показываем рекорд сразу
+highscoreEl.textContent = highscore;
 
-const asteroidImages = [
-  "asteroid-red.png",
-  "asteroid-blue.png",
-  "asteroid-yellow.png"
-];
+// ===== УПРАВЛЕНИЕ =====
+window.moveLeft = function () {
+  if (gameOver) return;
+  playerX = Math.max(0, playerX - 40);
+  player.style.left = playerX + "px";
+};
 
-// PLAYER
-let playerX = 120;
-player.style.left = playerX + "px";
-player.style.backgroundImage = "url(rocket.png)";
-player.style.backgroundSize = "contain";
-player.style.backgroundRepeat = "no-repeat";
+window.moveRight = function () {
+  if (gameOver) return;
+  playerX = Math.min(260, playerX + 40);
+  player.style.left = playerX + "px";
+};
 
-// ASTEROID
+// ===== ЗАПУСК ИГРЫ =====
+function startGame() {
+  gameOver = false;
+  score = 0;
+  level = 1;
+  speed = 4;
+
+  scoreEl.textContent = score;
+  levelEl.textContent = level;
+
+  restartBtn.style.display = "none";
+
+  if (spawnInterval) clearInterval(spawnInterval);
+  spawnInterval = setInterval(createAsteroid, 1000);
+}
+
+// ===== СОЗДАНИЕ АСТЕРОИДОВ =====
 function createAsteroid() {
   if (gameOver) return;
 
-  const a = document.createElement("div");
-  a.className = "block";
+  const lanes = [20, 130, 240];
+  let lane = lanes[Math.floor(Math.random() * lanes.length)];
 
-  const img = asteroidImages[Math.floor(Math.random() * asteroidImages.length)];
-  a.style.backgroundImage = `url(${img})`;
-  a.style.backgroundSize = "contain";
-  a.style.backgroundRepeat = "no-repeat";
+  const asteroid = document.createElement("div");
+  asteroid.className = "block";
 
-  a.style.left = Math.floor(Math.random() * 260) + "px";
-  a.style.top = "-40px";
+  // Тип астероида
+  let type = "red";
+  if (level >= 3) {
+    const types = ["red", "blue", "yellow"];
+    type = types[Math.floor(Math.random() * types.length)];
+  }
 
-  game.appendChild(a);
-  asteroids.push(a);
-}
+  asteroid.style.background = `url("asteroid_${type}.png") no-repeat center / contain`;
+  asteroid.style.left = lane + "px";
+  asteroid.style.top = "-40px";
 
-// GAME LOOP
-function update() {
-  if (gameOver) return;
+  game.appendChild(asteroid);
 
-  asteroids.forEach((a, i) => {
-    let top = parseInt(a.style.top);
-    a.style.top = top + (2 + level) + "px";
+  let y = -40;
+  let zigzag = type === "blue" ? (Math.random() < 0.5 ? 1 : -1) : 0;
+  let localSpeed = type === "yellow" ? speed + 2 : speed;
 
-    // collision
-    const aRect = a.getBoundingClientRect();
-    const pRect = player.getBoundingClientRect();
-
-    if (
-      aRect.left < pRect.right &&
-      aRect.right > pRect.left &&
-      aRect.top < pRect.bottom &&
-      aRect.bottom > pRect.top
-    ) {
-      gameOver = true;
-      alert("GAME OVER");
+  const fall = setInterval(() => {
+    if (gameOver) {
+      clearInterval(fall);
+      asteroid.remove();
+      return;
     }
 
-    if (top > 400) {
-      a.remove();
-      asteroids.splice(i, 1);
+    y += localSpeed;
+    asteroid.style.top = y + "px";
+
+    if (type === "blue") {
+      let x = parseInt(asteroid.style.left) + zigzag;
+      if (x < 0 || x > 260) zigzag *= -1;
+      asteroid.style.left = x + "px";
+    }
+
+    // Столкновение с ракетой
+    let asteroidX = parseInt(asteroid.style.left);
+    if (y > 330 && Math.abs(asteroidX - playerX) < 35) {
+      // Создаем взрыв на месте ракеты
+      createExplosion(playerX, 10);
+      endGame();
+      clearInterval(fall);
+      asteroid.remove();
+    }
+
+    // Ушел за экран
+    if (y > 420) {
+      clearInterval(fall);
+      asteroid.remove();
       score++;
       scoreEl.textContent = score;
-
-      if (score % 10 === 0) {
-        level++;
-        levelEl.textContent = level;
-      }
+      updateLevel();
     }
-  });
-
-  requestAnimationFrame(update);
+  }, 20);
 }
 
-// CONTROLS
-window.moveLeft = () => {
-  playerX -= 20;
-  if (playerX < 0) playerX = 0;
+// ===== ФУНКЦИЯ ВЗРЫВА =====
+function createExplosion(x, y) {
+  const explosion = document.createElement("div");
+  explosion.style.width = "40px";
+  explosion.style.height = "40px";
+  explosion.style.position = "absolute";
+  explosion.style.left = x + "px";
+  explosion.style.bottom = y + "px";
+  explosion.style.background = 'url("explosion.png") no-repeat center / contain';
+  game.appendChild(explosion);
+  setTimeout(() => explosion.remove(), 500);
+}
+
+// ===== УРОВНИ =====
+function updateLevel() {
+  let newLevel = Math.floor(score / 10) + 1;
+  if (newLevel !== level) {
+    level = newLevel;
+    levelEl.textContent = level;
+    speed++;
+  }
+}
+
+// ===== КОНЕЦ ИГРЫ =====
+function endGame() {
+  gameOver = true;
+  clearInterval(spawnInterval);
+  restartBtn.style.display = "block";
+
+  // Сохраняем рекорд в localStorage
+  if (score > highscore) {
+    highscore = score;
+    localStorage.setItem("highscore", highscore);
+    highscoreEl.textContent = highscore;
+  }
+}
+
+// ===== RESTART =====
+window.restartGame = function () {
+  document.querySelectorAll(".block").forEach(b => b.remove());
+  playerX = 130;
   player.style.left = playerX + "px";
+  startGame();
 };
 
-window.moveRight = () => {
-  playerX += 20;
-  if (playerX > 260) playerX = 260;
-  player.style.left = playerX + "px";
+// Автостарт игры
+startGame();
+
 };
-
-// START
-setInterval(createAsteroid, 1000);
-update();
-
-});
