@@ -1,47 +1,37 @@
-const asteroidImages = [
-  "asteroid-red.png",
-  "asteroid-blue.png",
-  "asteroid-yellow.png"
-];
+document.addEventListener("DOMContentLoaded", () => {
+
 const game = document.getElementById("game");
 const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
 const levelEl = document.getElementById("level");
 const highscoreEl = document.getElementById("highscore");
-const restartBtn = document.getElementById("restartBtn");
 
-let playerX = 130;
+let asteroids = [];
 let score = 0;
 let level = 1;
 let gameOver = false;
-let asteroids = [];
 
-let highscore = localStorage.getItem("highscore") || 0;
-highscoreEl.textContent = highscore;
+const asteroidImages = [
+  "asteroid-red.png",
+  "asteroid-blue.png",
+  "asteroid-yellow.png"
+];
 
-/* УПРАВЛЕНИЕ */
-function moveLeft() {
-  if (playerX > 0) {
-    playerX -= 20;
-    player.style.left = playerX + "px";
-  }
-}
+// PLAYER
+let playerX = 120;
+player.style.left = playerX + "px";
+player.style.backgroundImage = "url(rocket.png)";
+player.style.backgroundSize = "contain";
+player.style.backgroundRepeat = "no-repeat";
 
-function moveRight() {
-  if (playerX < 260) {
-    playerX += 20;
-    player.style.left = playerX + "px";
-  }
+// ASTEROID
 function createAsteroid() {
   if (gameOver) return;
 
   const a = document.createElement("div");
   a.className = "block";
 
-  const img = asteroidImages[
-    Math.floor(Math.random() * asteroidImages.length)
-  ];
-
+  const img = asteroidImages[Math.floor(Math.random() * asteroidImages.length)];
   a.style.backgroundImage = `url(${img})`;
   a.style.backgroundSize = "contain";
   a.style.backgroundRepeat = "no-repeat";
@@ -53,34 +43,29 @@ function createAsteroid() {
   asteroids.push(a);
 }
 
-/* ВЗРЫВ */
-function explosion(x, y) {
-  const e = document.createElement("div");
-  e.className = "explosion";
-  e.style.left = x + "px";
-  e.style.top = y + "px";
-  game.appendChild(e);
-  setTimeout(() => e.remove(), 400);
-}
-
-/* ОБНОВЛЕНИЕ */
+// GAME LOOP
 function update() {
   if (gameOver) return;
 
-  for (let i = asteroids.length - 1; i >= 0; i--) {
-    const a = asteroids[i];
-    a.style.top = a.offsetTop + (2 + level) + "px";
+  asteroids.forEach((a, i) => {
+    let top = parseInt(a.style.top);
+    a.style.top = top + (2 + level) + "px";
+
+    // collision
+    const aRect = a.getBoundingClientRect();
+    const pRect = player.getBoundingClientRect();
 
     if (
-      a.offsetTop + 40 >= 350 &&
-      a.offsetLeft < playerX + 40 &&
-      a.offsetLeft + 40 > playerX
+      aRect.left < pRect.right &&
+      aRect.right > pRect.left &&
+      aRect.top < pRect.bottom &&
+      aRect.bottom > pRect.top
     ) {
-      explosion(playerX, 350);
-      endGame();
+      gameOver = true;
+      alert("GAME OVER");
     }
 
-    if (a.offsetTop > 400) {
+    if (top > 400) {
       a.remove();
       asteroids.splice(i, 1);
       score++;
@@ -90,33 +75,27 @@ function update() {
         level++;
         levelEl.textContent = level;
       }
-
-      if (score > highscore) {
-        highscore = score;
-        highscoreEl.textContent = highscore;
-        localStorage.setItem("highscore", highscore);
-      }
     }
-  }
+  });
+
+  requestAnimationFrame(update);
 }
 
-/* КОНЕЦ */
-function endGame() {
-  gameOver = true;
-  restartBtn.style.display = "block";
-}
+// CONTROLS
+window.moveLeft = () => {
+  playerX -= 20;
+  if (playerX < 0) playerX = 0;
+  player.style.left = playerX + "px";
+};
 
-/* РЕСТАРТ */
-function restartGame() {
-  asteroids.forEach(a => a.remove());
-  asteroids = [];
-  score = 0;
-  level = 1;
-  scoreEl.textContent = 0;
-  levelEl.textContent = 1;
-  gameOver = false;
-  restartBtn.style.display = "none";
-}
+window.moveRight = () => {
+  playerX += 20;
+  if (playerX > 260) playerX = 260;
+  player.style.left = playerX + "px";
+};
 
+// START
 setInterval(createAsteroid, 1000);
-setInterval(update, 20);
+update();
+
+});
