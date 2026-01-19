@@ -1,3 +1,8 @@
+const asteroidImages = [
+  "asteroid-red.png",
+  "asteroid-blue.png",
+  "asteroid-yellow.png"
+];
 const game = document.getElementById("game");
 const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
